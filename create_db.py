@@ -17,6 +17,7 @@ c.execute('''
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY,
     nom TEXT,
+    type TEXT,
     prix REAL
 )
 ''')
@@ -35,27 +36,28 @@ CREATE TABLE IF NOT EXISTS ventes (
 
 # Données fictives pour TTMIK
 clients = [
-    (1, 'Alice', 'Amérique du Nord'),
-    (2, 'Bob', 'Europe'),
-    (3, 'Charlie', 'Asie'),
+    (1, 'Seline', 'Amérique du Nord'),
+    (2, 'Edword', 'Europe'),
+    (3, 'Kim', 'Asie'),
     (4, 'Diana', 'Amérique du Sud'),
-    (5, 'Ethan', 'Afrique')
+    (5, 'Moufdi', 'Afrique')
 ]
 
+# Produits diversifiés : cours, livres, YouTube memberships, contenu monétisé
 produits = [
-    (1, 'Cours Débutant TTMIK', 50),
-    (2, 'Cours Intermédiaire TTMIK', 70),
-    (3, 'Cours Avancé TTMIK', 100),
-    (4, 'Livre de Grammaire', 30),
-    (5, 'Livre de Vocabulaire', 25)
+    (1, 'Cours Débutant', 'Cours', 50),
+    (2, 'Cours Avancé', 'Cours', 100),
+    (3, 'Mini-Course: Korean Pronunciation', 'Cours', 20),
+    (4, 'YouTube Membership - Premium', 'Membership', 10),
+    (5, 'E-book de Vocabulaire', 'Contenu numérique', 15)
 ]
 
 ventes = [
     (1, 1, 1, 1, '2025-01-05'),
     (2, 2, 2, 1, '2025-02-10'),
     (3, 3, 3, 1, '2025-03-15'),
-    (4, 4, 4, 2, '2025-04-20'),
-    (5, 5, 5, 1, '2025-05-25'),
+    (4, 4, 4, 1, '2025-04-20'),
+    (5, 5, 5, 2, '2025-05-25'),
     (6, 1, 2, 1, '2025-06-05'),
     (7, 2, 3, 1, '2025-07-10'),
     (8, 3, 4, 1, '2025-08-15'),
@@ -65,11 +67,11 @@ ventes = [
 
 # Insertion des données
 c.executemany('INSERT INTO clients VALUES (?, ?, ?)', clients)
-c.executemany('INSERT INTO produits VALUES (?, ?, ?)', produits)
+c.executemany('INSERT INTO produits VALUES (?, ?, ?, ?)', produits)
 c.executemany('INSERT INTO ventes VALUES (?, ?, ?, ?, ?)', ventes)
 
 # Validation et fermeture
 conn.commit()
 conn.close()
 
-print("Base de données 'ventes.db' créée avec succès avec les données fictives TTMIK !")
+print("Base de données 'ventes.db' créée avec succès avec les données diversifiées TTMIK !")
