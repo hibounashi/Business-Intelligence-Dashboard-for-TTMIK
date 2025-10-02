@@ -22,8 +22,7 @@ Built using **Python**, **Streamlit**, and **SQLite**, this dashboard allows you
 ### 1. Clone the repository and navigate to it
 
 ```bash
-git clone https://github.com/your-username/ttmik_bi_dashboard.git
-cd ttmik_bi_dashboard
+git clone https://github.com/hibounashi/Business-Intelligence-Dashboard-for-TTMIK
 ```
 2. Create a Python virtual environment
 ```bash
@@ -44,8 +43,9 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 Make sure requirements.txt includes:
-streamlit, pandas, sqlite3 (built-in with Python), matplotlib or plotly if used
-
+```bash
+streamlit, pandas, sqlite3
+```
 Running the Dashboard
 ```bash
 streamlit run app.py
