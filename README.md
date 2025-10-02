@@ -46,9 +46,13 @@ Make sure requirements.txt includes:
 ```bash
 streamlit, pandas, sqlite3
 ```
+create the database
+```bash
+py create_db.py
+```
 Running the Dashboard
 ```bash
-streamlit run app.py
+streamlit run Streamlit.py
 ```
 Open the URL provided in the terminal (usually http://localhost:8501)
 
