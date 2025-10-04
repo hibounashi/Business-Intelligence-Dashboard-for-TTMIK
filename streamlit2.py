@@ -1,7 +1,8 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 
 # ---- Configuration page Streamlit ----
 st.set_page_config(
@@ -37,17 +38,17 @@ users = pd.read_sql("SELECT * FROM users", conn)
 #                CALCULS DES KPI
 # ======================================================
 
-# Taux de fidélisation des clients
+# Taux de fidélisation
 total_abonnes = len(subscriptions)
-abonnes_renouveles = subscriptions['renewed'].sum()
-taux_fidelisation = (abonnes_renouveles / total_abonnes) * 100
+abonnes_renouveles = subscriptions['renewed'].sum() if 'renewed' in subscriptions else 0
+taux_fidelisation = (abonnes_renouveles / total_abonnes) * 100 if total_abonnes > 0 else 0
 
 # Taux de complétion des cours
-merged_progress = user_course_progress.merge(courses, on="course_id")
+merged_progress = user_course_progress.merge(courses, on="course_id", how="left")
 merged_progress["completion_rate"] = (merged_progress["completed_lessons"] / merged_progress["total_lessons"]) * 100
 taux_completion_moyen = merged_progress["completion_rate"].mean()
 
-# Taux de croissance des ventes de livres (par format)
+# Taux de croissance des ventes de livres
 book_sales["sale_date"] = pd.to_datetime(book_sales["sale_date"])
 book_sales["mois"] = book_sales["sale_date"].dt.to_period("M").astype(str)
 ca_par_mois = book_sales.groupby("mois")["total_amount"].sum().reset_index()
@@ -57,10 +58,10 @@ if len(ca_par_mois) > 1:
 else:
     croissance_livres = 0
 
-# Part des revenus provenant des adhésions YouTube
+# Part des revenus YouTube
 revenu_total = revenues["amount"].sum()
-revenu_youtube = revenues[revenues["source"] == "youtube_memberships"]["amount"].sum()
-part_youtube = (revenu_youtube / revenu_total) * 100
+revenu_youtube = revenues[revenues["source"] == "youtube_memberships"]["amount"].sum() if "youtube_memberships" in revenues["source"].values else 0
+part_youtube = (revenu_youtube / revenu_total) * 100 if revenu_total > 0 else 0
 
 # ======================================================
 #               AFFICHAGE DES KPI 
@@ -83,27 +84,64 @@ col7.metric("📦 Croissance ventes livres", f"{croissance_livres:.1f}%")
 col8.metric("▶️ Part revenus YouTube", f"{part_youtube:.1f}%")
 
 # ======================================================
-#                VISUALISATIONS 
+#                VISUALISATIONS AVEC PLOTLY
 # ======================================================
 
 st.markdown("### 📊 Visualisations")
 
-# CA mensuel (livres)
-fig1, ax1 = plt.subplots(figsize=(6, 3))
-ax1.plot(ca_par_mois["mois"], ca_par_mois["total_amount"], marker='o', color='#2ca02c')
-ax1.set_title("Évolution mensuelle des ventes de livres")
-ax1.set_xlabel("Mois")
-ax1.set_ylabel("Montant (USD)")
-st.pyplot(fig1)
+# Palette de couleurs lisible en clair et sombre
+custom_colors = ["#7b2ff7", "#5b7fff", "#80d0c7", "#c77dff", "#9d4edd"]
 
-# Répartition des revenus
-revenus_source = revenues.groupby("source")["amount"].sum()
-fig2, ax2 = plt.subplots(figsize=(4, 4))
-ax2.pie(revenus_source, labels=revenus_source.index, autopct='%1.1f%%', startangle=90)
-ax2.set_title("Répartition des revenus par source")
-st.pyplot(fig2)
+# ---- Évolution mensuelle des ventes de livres ----
+if not ca_par_mois.empty:
+    fig1 = px.line(
+        ca_par_mois,
+        x="mois",
+        y="total_amount",
+        title="📅 Évolution mensuelle des ventes de livres",
+        markers=True,
+        color_discrete_sequence=["#7b2ff7"]
+    )
+    fig1.update_traces(line=dict(width=3))
+    fig1.update_layout(
+        template="plotly_dark" if st.get_option("theme.base") == "dark" else "plotly_white",
+        title_font=dict(size=18),
+        xaxis_title="Mois",
+        yaxis_title="Montant (USD)",
+        font=dict(color="#3a0ca3", size=13),
+        hovermode="x unified"
+    )
+    st.plotly_chart(fig1, use_container_width=True)
 
-# Table détaillée (facultative)
+# ---- Répartition des revenus ----
+if not revenues.empty:
+    revenus_source = revenues.groupby("source")["amount"].sum().reset_index()
+    fig2 = px.pie(
+        revenus_source,
+        names="source",
+        values="amount",
+        title="💡 Répartition des revenus par source",
+        color_discrete_sequence=custom_colors
+    )
+    fig2.update_traces(
+        textinfo="percent+label",
+        textfont_size=14,
+        insidetextorientation="auto",
+        textposition="inside",
+        pull=[0.05]*len(revenus_source),
+        showlegend=True
+    )
+    fig2.update_layout(
+        template="plotly_dark" if st.get_option("theme.base") == "dark" else "plotly_white",
+        title_font=dict(size=18),
+        font=dict(color="#3a0ca3", size=13)
+    )
+    st.plotly_chart(fig2, use_container_width=True)
+
+# ======================================================
+#                TABLES DÉTAILLÉES
+# ======================================================
+
 with st.expander("📂 Voir les données détaillées"):
     st.write("### Abonnements")
     st.dataframe(subscriptions)
