@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "streamlit2.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "streamlit2.py"
+    }
+  ]
+}
